@@ -11,6 +11,9 @@
         "vulkan_platform.h": "c",
         "windowsx.h": "c",
         "logger.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "platform.h": "c",
+        "application.h": "c",
+        "entry.h": "c"
     }
 }

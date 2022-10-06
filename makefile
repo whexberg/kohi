@@ -12,6 +12,20 @@ else
     endif
 endif
 
+ifeq ($(PLATFORM), windows)
+all: build
+
+build:
+	@.\build-all.bat
+
+run: build
+	@.\bin\testbed
+
+clean:
+	@del /q .\bin\*
+endif
+
+ifeq ($(PLATFORM), linux)
 all: build
 
 build:
@@ -23,3 +37,4 @@ run: build
 
 clean:
 	@rm -rf ./bin/*
+endif
