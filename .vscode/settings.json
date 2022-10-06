@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        ".env*": "env",
         "renderer_frontend.h": "c",
         "test.h": "c",
         "type_traits": "c",
@@ -8,6 +9,8 @@
         "vulkan.h": "c",
         "vulkan_core.h": "c",
         "vulkan_platform.h": "c",
-        "windowsx.h": "c"
+        "windowsx.h": "c",
+        "logger.h": "c",
+        "stdarg.h": "c"
     }
 }

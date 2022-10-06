@@ -3,6 +3,7 @@
 # Build script for testbed
 
 set echo on
+set -e
 
 mkdir -p ../bin
 
@@ -12,7 +13,7 @@ cFilenames=$(find . -type f -name "*.c")
 # echo "Files:" $cFilenames
 
 assembly="testbed"
-compilerFlags="-g -fdeclspec -fPIC" 
+compilerFlags="-g -fdeclspec -fPIC -Wall -Werror" 
 # -fms-extensions 
 # -Wall -Werror
 includeFlags="-Isrc -I../engine/src/"
