@@ -17,9 +17,7 @@
             "options": { "cwd": "${workspaceFolder}/testbed" },
             "problemMatcher": ["$gcc"],
             "type": "shell",
-            "windows": {
-                "command": "${workspaceFolder}/testbed/build.bat"
-            }
+            "windows": { "command": "${workspaceFolder}/testbed/build.bat" }
         },
         {
             "group": { "isDefault": true, "kind": "build" },

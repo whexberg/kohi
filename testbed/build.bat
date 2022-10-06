@@ -13,9 +13,9 @@ REM echo "Files:" %cFilenames%
 SET assembly=testbed
 SET compilerFlags=-g 
 REM -Wall -Werror
-SET includeFlags=-Isrc -I%~dp0/../engine/src/
-SET linkerFlags=-L%~dp0/../bin/ -lengine.lib
+SET includeFlags=-Isrc -I../engine/src/
+SET linkerFlags=-L../bin/ -lengine.lib
 SET defines=-D_DEBUG -DKIMPORT
 
 ECHO "Building %assembly%%..."
-clang %cFilenames% %compilerFlags% -o %~dp0/../bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%
+clang %cFilenames% %compilerFlags% -o ../bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%

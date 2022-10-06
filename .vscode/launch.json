@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
+            "name": "Launch (Windows)",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/testbed.exe",
@@ -13,17 +13,19 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/",
             "environment": [],
-            "console": "newExternalWindow"
+            "console": "newExternalWindow",
+            "preLaunchTask": "Build Everything"
         },
         {
-            "name": "(Linux) Launch",
+            "name": "Launch (Linux)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/testbed",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/",
-            "environment": []
+            "environment": [],
+            "preLaunchTask": "Build Everything"
         }
     ]
 }

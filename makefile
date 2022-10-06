@@ -1,4 +1,8 @@
+all: build
+
 build:
-	.\build-all.bat
-run:
-	@.\bin\testbed
+	@./build-all.sh
+	@chmod +x ./bin/testbed
+
+run: build
+	@cd bin; ./testbed; cd ..
