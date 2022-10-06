@@ -1,8 +1,9 @@
 #include "application.h"
 
+#include "core/event.h"
+#include "core/kmemory.h"
+#include "core/logger.h"
 #include "game_types.h"
-#include "kmemory.h"
-#include "logger.h"
 #include "platform/platform.h"
 
 typedef struct application_state {
@@ -40,6 +41,11 @@ b8 application_create(game *game_inst) {
     app_state.is_running = TRUE;
     app_state.is_suspended = FALSE;
 
+    if (!event_initialize()) {
+        KERROR("Event system failed initialization. Application cannot continue");
+        return FALSE;
+    }
+
     if (!platform_startup(&app_state.platform, game_inst->app_config.name, game_inst->app_config.start_pos_x,
                           game_inst->app_config.start_pos_y, game_inst->app_config.start_width,
                           game_inst->app_config.start_height)) {
@@ -61,7 +67,7 @@ b8 application_create(game *game_inst) {
 
 b8 application_run() {
     KINFO(get_memory_usage_str());
-    
+
     while (app_state.is_running) {
         if (!platform_pump_messages(&app_state.platform)) {
             app_state.is_running = FALSE;
@@ -83,6 +89,8 @@ b8 application_run() {
     }
 
     app_state.is_running = FALSE;
+
+    event_shutdown();
 
     platform_shutdown(&app_state.platform);
 
