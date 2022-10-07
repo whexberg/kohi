@@ -3,11 +3,12 @@
 // Windows platform layer.
 #if KPLATFORM_WINDOWS
 
-#include "core/logger.h"
-
+#include <stdlib.h>
 #include <windows.h>
 #include <windowsx.h>  // param input extraction
-#include <stdlib.h>
+
+#include "core/input.h"
+#include "core/logger.h"
 
 typedef struct internal_state {
     HINSTANCE h_instance;
@@ -20,13 +21,7 @@ static LARGE_INTEGER start_time;
 
 LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param);
 
-b8 platform_startup(
-    platform_state *plat_state,
-    const char *application_name,
-    i32 x,
-    i32 y,
-    i32 width,
-    i32 height) {
+b8 platform_startup(platform_state *plat_state, const char *application_name, i32 x, i32 y, i32 width, i32 height) {
     plat_state->internal_state = malloc(sizeof(internal_state));
     internal_state *state = (internal_state *)plat_state->internal_state;
 
@@ -81,10 +76,8 @@ b8 platform_startup(
     window_width += border_rect.right - border_rect.left;
     window_height += border_rect.bottom - border_rect.top;
 
-    HWND handle = CreateWindowExA(
-        window_ex_style, "kohi_window_class", application_name,
-        window_style, window_x, window_y, window_width, window_height,
-        0, 0, state->h_instance, 0);
+    HWND handle = CreateWindowExA(window_ex_style, "kohi_window_class", application_name, window_style, window_x,
+                                  window_y, window_width, window_height, 0, 0, state->h_instance, 0);
 
     if (handle == 0) {
         MessageBoxA(NULL, "Window creation failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
@@ -131,25 +124,15 @@ b8 platform_pump_messages(platform_state *plat_state) {
     return TRUE;
 }
 
-void *platform_allocate(u64 size, b8 aligned) {
-    return malloc(size);
-}
+void *platform_allocate(u64 size, b8 aligned) { return malloc(size); }
 
-void platform_free(void *block, b8 aligned) {
-    free(block);
-}
+void platform_free(void *block, b8 aligned) { free(block); }
 
-void *platform_zero_memory(void *block, u64 size) {
-    return memset(block, 0, size);
-}
+void *platform_zero_memory(void *block, u64 size) { return memset(block, 0, size); }
 
-void *platform_copy_memory(void *dest, const void *source, u64 size) {
-    return memcpy(dest, source, size);
-}
+void *platform_copy_memory(void *dest, const void *source, u64 size) { return memcpy(dest, source, size); }
 
-void *platform_set_memory(void *dest, i32 value, u64 size) {
-    return memset(dest, value, size);
-}
+void *platform_set_memory(void *dest, i32 value, u64 size) { return memset(dest, value, size); }
 
 void platform_console_write(const char *message, u8 color) {
     HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -179,9 +162,7 @@ f64 platform_get_absolute_time() {
     return (f64)now_time.QuadPart * clock_frequency;
 }
 
-void platform_sleep(u64 ms) {
-    Sleep(ms);
-}
+void platform_sleep(u64 ms) { Sleep(ms); }
 
 LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param) {
     switch (msg) {
@@ -208,23 +189,27 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARA
         case WM_KEYUP:
         case WM_SYSKEYUP: {
             // Key pressed/released
-            //b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
-            // TODO: input processing
+            b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
+            keys key = (u16)w_param;
 
+            // Pass to the input subsystem for processing.
+            input_process_key(key, pressed);
         } break;
         case WM_MOUSEMOVE: {
             // Mouse move
-            //i32 x_position = GET_X_LPARAM(l_param);
-            //i32 y_position = GET_Y_LPARAM(l_param);
-            // TODO: input processing.
+            i32 x_position = GET_X_LPARAM(l_param);
+            i32 y_position = GET_Y_LPARAM(l_param);
+
+            // Pass over to the input subsystem.
+            input_process_move(x_position, y_position);
         } break;
         case WM_MOUSEWHEEL: {
-            // i32 z_delta = GET_WHEEL_DELTA_WPARAM(w_param);
-            // if (z_delta != 0) {
-            //     // Flatten the input to an OS-independent (-1, 1)
-            //     z_delta = (z_delta < 0) ? -1 : 1;
-            //     // TODO: input processing.
-            // }
+            i32 z_delta = GET_WHEEL_DELTA_WPARAM(w_param);
+            if (z_delta != 0) {
+                // Flatten the input to an OS-independent (-1, 1)
+                z_delta = (z_delta < 0) ? -1 : 1;
+                input_process_mouse_wheel(z_delta);
+            }
         } break;
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
@@ -232,12 +217,27 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARA
         case WM_LBUTTONUP:
         case WM_MBUTTONUP:
         case WM_RBUTTONUP: {
-            //b8 pressed = msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN;
-            // TODO: input processing.
+            b8 pressed = msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN;
+
+            buttons mouse_button = BUTTON_MAX_BUTTONS;
+            if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP) {
+                mouse_button = BUTTON_LEFT;
+            }
+            if (msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP) {
+                mouse_button = BUTTON_MIDDLE;
+            }
+            if (msg == WM_RBUTTONDOWN || msg == WM_RBUTTONUP) {
+                mouse_button = BUTTON_RIGHT;
+            }
+
+            // Pass over to the input subsystem.
+            if (mouse_button != BUTTON_MAX_BUTTONS) {
+                input_process_button(mouse_button, pressed);
+            }
         } break;
     }
 
     return DefWindowProcA(hwnd, msg, w_param, l_param);
 }
 
-#endif // KPLATFORM_WINDOWS
+#endif  // KPLATFORM_WINDOWS
